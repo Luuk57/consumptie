@@ -32,7 +32,6 @@
                 <span class="text-sm font-bold text-slate-700 uppercase tracking-wide">Drinken Totaal Vandaag</span>
                 <span id="totaalTekst" class="text-sm font-extrabold text-sky-700">0 / 1000 ml</span>
             </div>
-            <!-- Progressbar -->
             <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden p-0.5 border border-slate-200">
                 <div id="progressBar" class="bg-sky-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
@@ -47,22 +46,24 @@
             <button onclick="switchTab('config')" id="tab-config" class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition">⚙️ Config</button>
         </div>
 
-        <!-- TAB 1: Eten Invoeren (met snelkeuzes) -->
+        <!-- TAB 1: Eten Invoeren -->
         <div id="section-eten" class="tab-content bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
             <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🍽️ Eten Invoeren (Snelkeuze)</h2>
             
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">1. Kies Product</label>
-                <div id="etenProductKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <!-- Wordt dynamisch gevuld met knoppen -->
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Product</label>
+                    <button onclick="vraagNieuweSnelkeuze('eten', 'Nieuw eten product:')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Product Toevoegen</button>
                 </div>
+                <div id="etenProductKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">2. Kies Hoeveelheid / Eenheid</label>
-                <div id="etenEenheidKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <!-- Wordt dynamisch gevuld met knoppen -->
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-semibold uppercase text-slate-500">2. Kies Hoeveelheid / Eenheid</label>
+                    <button onclick="vraagNieuweSnelkeuze('eenheden', 'Nieuwe eenheid (bijv. Kom):')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Eenheid Toevoegen</button>
                 </div>
+                <div id="etenEenheidKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
             </div>
 
             <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex justify-between items-center text-sm">
@@ -85,22 +86,24 @@
             <button onclick="slaEtenOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition">Alles Opslaan naar Google Sheet</button>
         </div>
 
-        <!-- TAB 2: Drinken Invoeren (met snelkeuzes) -->
+        <!-- TAB 2: Drinken Invoeren -->
         <div id="section-dranken" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
             <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🥤 Drinken Invoeren (Snelkeuze)</h2>
             
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">1. Kies Drankje</label>
-                <div id="drankTypeKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <!-- Wordt dynamisch gevuld met knoppen -->
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Drankje</label>
+                    <button onclick="vraagNieuweSnelkeuze('dranken', 'Nieuw drankje:')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Drankje Toevoegen</button>
                 </div>
+                <div id="drankTypeKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">2. Kies Hoeveelheid (ml)</label>
-                <div id="drankMlKnoppen" class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                    <!-- Wordt dynamisch gevuld met knoppen -->
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-semibold uppercase text-slate-500">2. Kies Hoeveelheid (ml)</label>
+                    <button onclick="vraagNieuweSnelkeuze('hoeveelheden', 'Nieuwe hoeveelheid in ml (bijv. 350):')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Aantal ml Toevoegen</button>
                 </div>
+                <div id="drankMlKnoppen" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
             </div>
 
             <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex justify-between items-center text-sm">
@@ -141,9 +144,7 @@
                             <th class="py-2 px-2 text-right">Actie</th>
                         </tr>
                     </thead>
-                    <tbody id="dagOverzichtTbody">
-                        <!-- Wordt dynamisch gevuld -->
-                    </tbody>
+                    <tbody id="dagOverzichtTbody"></tbody>
                 </table>
             </div>
         </div>
@@ -177,9 +178,7 @@
                             <th class="py-2 px-2">Notitie</th>
                         </tr>
                     </thead>
-                    <tbody id="totaalOverzichtTbody">
-                        <!-- Wordt dynamisch gevuld -->
-                    </tbody>
+                    <tbody id="totaalOverzichtTbody"></tbody>
                 </table>
             </div>
         </div>
@@ -202,10 +201,10 @@
 
         let appConfig = {
             limiet: 1000,
-            dranken: ['Koffie', 'Thee', 'Water', 'Soep', 'Melk'],
-            hoeveelheden: [50, 100, 150, 200, 250, 300],
-            eten: ['Brood', 'Fruit', 'Yoghurt', 'Koek', 'Warme Maaltijd'],
-            eenheden: ['Portie', 'Plak', 'Stuk', 'Kom', 'Bord']
+            dranken: [],
+            hoeveelheden: [],
+            eten: [],
+            eenheden: []
         };
 
         let gekozenEtenProduct = '';
@@ -249,9 +248,9 @@
             fetch(`${WEB_APP_URL}?actie=getConfig`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data && data.limiet) {
+                    if (data) {
                         appConfig = data;
-                        document.getElementById('configLimiet').value = appConfig.limiet;
+                        document.getElementById('configLimiet').value = appConfig.limiet || 1000;
                     }
                     bouwSnelkeuzes();
                     laadDagOverzicht();
@@ -263,33 +262,46 @@
         }
 
         function bouwSnelkeuzes() {
-            // Eten producten knoppen
             const prodContainer = document.getElementById('etenProductKnoppen');
             prodContainer.innerHTML = '';
             appConfig.eten.forEach(item => {
                 prodContainer.innerHTML += `<button onclick="selecteerEtenProduct('${item}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
             });
 
-            // Eten eenheden knoppen
             const eenheidContainer = document.getElementById('etenEenheidKnoppen');
             eenheidContainer.innerHTML = '';
             appConfig.eenheden.forEach(item => {
                 eenheidContainer.innerHTML += `<button onclick="selecteerEtenEenheid('${item}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
             });
 
-            // Drinken type knoppen
             const drankContainer = document.getElementById('drankTypeKnoppen');
             drankContainer.innerHTML = '';
             appConfig.dranken.forEach(item => {
                 drankContainer.innerHTML += `<button onclick="selecteerDrankType('${item}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
             });
 
-            // Drinken ml knoppen
             const mlContainer = document.getElementById('drankMlKnoppen');
             mlContainer.innerHTML = '';
             appConfig.hoeveelheden.forEach(ml => {
                 mlContainer.innerHTML += `<button onclick="selecteerDrankMl('${ml}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${ml} ml</button>`;
             });
+        }
+
+        // Nieuwe snelkeuze toevoegen via pop-up prompt
+        function vraagNieuweSnelkeuze(categorie, vraagTekst) {
+            const waarde = prompt(vraagTekst);
+            if (!waarde || !waarde.trim()) return;
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ actie: 'voegSnelkeuzeToe', categorie: categorie, waarde: waarde.trim() })
+            })
+            .then(res => res.json())
+            .then(res => {
+                toonStatus(res.message);
+                laadConfig(); // Herlaad instellingen zodat de nieuwe knop direct verschijnt
+            })
+            .catch(err => toonStatus("Fout bij toevoegen: " + err, true));
         }
 
         function selecteerEtenProduct(prod, btn) {
@@ -307,18 +319,12 @@
         }
 
         function updateEtenLabel() {
-            const label = (gekozenEtenProduct || 'Kies product') + ' (' + (gekozenEtenEenheid || 'kies hoeveelheid') + ')';
-            document.getElementById('geselecteerdEtenLabel').innerText = label;
+            document.getElementById('geselecteerdEtenLabel').innerText = (gekozenEtenProduct || 'Kies product') + ' (' + (gekozenEtenEenheid || 'kies eenheid') + ')';
         }
 
         function voegEtenToeAanLijst() {
             if (!gekozenEtenProduct || !gekozenEtenEenheid) return toonStatus("Kies eerst zowel een product als een hoeveelheid/eenheid.", true);
             teVerzendenEten.push({ produkt: gekozenEtenProduct, hoeveelheid: gekozenEtenEenheid });
-            renderEtenLijst();
-        }
-
-        function verwijderEtenUitLijst(index) {
-            teVerzendenEten.splice(index, 1);
             renderEtenLijst();
         }
 
@@ -330,7 +336,7 @@
             }
             container.innerHTML = '';
             teVerzendenEten.forEach((item, index) => {
-                container.innerHTML += `<div class="flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm"><span>${item.produkt} (${item.hoeveelheid})</span><button onclick="verwijderEtenUitLijst(${index})" class="text-red-500 text-xs font-bold">X</button></div>`;
+                container.innerHTML += `<div class="flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm"><span>${item.produkt} (${item.hoeveelheid})</span><button onclick="teVerzendenEten.splice(${index},1);renderEtenLijst();" class="text-red-500 text-xs font-bold">X</button></div>`;
             });
         }
 
@@ -349,18 +355,12 @@
         }
 
         function updateDrankLabel() {
-            const label = (gekozenDrankType || 'Kies drankje') + ' - ' + (gekozenDrankMl ? gekozenDrankMl + ' ml' : 'kies ml');
-            document.getElementById('geselecteerdDrankLabel').innerText = label;
+            document.getElementById('geselecteerdDrankLabel').innerText = (gekozenDrankType || 'Kies drankje') + ' - ' + (gekozenDrankMl ? gekozenDrankMl + ' ml' : 'kies ml');
         }
 
         function voegDrankToeAanLijst() {
             if (!gekozenDrankType || !gekozenDrankMl) return toonStatus("Kies eerst zowel een drankje als een hoeveelheid in ml.", true);
             teVerzendenDranken.push({ drank: gekozenDrankType, hoeveelheid: gekozenDrankMl });
-            renderDrankLijst();
-        }
-
-        function verwijderDrankUitLijst(index) {
-            teVerzendenDranken.splice(index, 1);
             renderDrankLijst();
         }
 
@@ -372,52 +372,42 @@
             }
             container.innerHTML = '';
             teVerzendenDranken.forEach((item, index) => {
-                container.innerHTML += `<div class="flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm"><span>${item.drank} (${item.hoeveelheid} ml)</span><button onclick="verwijderDrankUitLijst(${index})" class="text-red-500 text-xs font-bold">X</button></div>`;
+                container.innerHTML += `<div class="flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm"><span>${item.drank} (${item.hoeveelheid} ml)</span><button onclick="teVerzendenDranken.splice(${index},1);renderDrankLijst();" class="text-red-500 text-xs font-bold">X</button></div>`;
             });
         }
 
         function slaEtenOp() {
             if (teVerzendenEten.length === 0) return toonStatus("Voeg minimaal één item toe aan de lijst.", true);
-
-            const payload = {
-                actie: 'slaInnameOp',
-                type: 'eten',
-                items: teVerzendenEten,
-                notitie: document.getElementById('etenNotitie').value
-            };
-
-            fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) })
-                .then(res => res.json())
-                .then(res => {
-                    toonStatus(res.message);
-                    document.getElementById('etenNotitie').value = '';
-                    teVerzendenEten = [];
-                    renderEtenLijst();
-                    laadDagOverzicht();
-                })
-                .catch(err => toonStatus("Fout bij opslaan: " + err, true));
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ actie: 'slaInnameOp', type: 'eten', items: teVerzendenEten, notitie: document.getElementById('etenNotitie').value })
+            })
+            .then(res => res.json())
+            .then(res => {
+                toonStatus(res.message);
+                document.getElementById('etenNotitie').value = '';
+                teVerzendenEten = [];
+                renderEtenLijst();
+                laadDagOverzicht();
+            })
+            .catch(err => toonStatus("Fout bij opslaan: " + err, true));
         }
 
         function slaDrankenOp() {
             if (teVerzendenDranken.length === 0) return toonStatus("Voeg minimaal één drankje toe aan de lijst.", true);
-
-            const payload = {
-                actie: 'slaInnameOp',
-                type: 'dranken',
-                items: teVerzendenDranken,
-                notitie: document.getElementById('drankNotitie').value
-            };
-
-            fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) })
-                .then(res => res.json())
-                .then(res => {
-                    toonStatus(res.message);
-                    document.getElementById('drankNotitie').value = '';
-                    teVerzendenDranken = [];
-                    renderDrankLijst();
-                    laadDagOverzicht();
-                })
-                .catch(err => toonStatus("Fout bij opslaan: " + err, true));
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ actie: 'slaInnameOp', type: 'dranken', items: teVerzendenDranken, notitie: document.getElementById('drankNotitie').value })
+            })
+            .then(res => res.json())
+            .then(res => {
+                toonStatus(res.message);
+                document.getElementById('drankNotitie').value = '';
+                teVerzendenDranken = [];
+                renderDrankLijst();
+                laadDagOverzicht();
+            })
+            .catch(err => toonStatus("Fout bij opslaan: " + err, true));
         }
 
         function laadDagOverzicht() {
@@ -427,7 +417,6 @@
                 .then(data => {
                     const tbody = document.getElementById('dagOverzichtTbody');
                     tbody.innerHTML = '';
-
                     if (!data.items || data.items.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">Geen registraties gevonden voor deze dag</td></tr>`;
                     } else {
@@ -443,7 +432,6 @@
                             `;
                         });
                     }
-
                     const totaalMl = data.totaalMl || 0;
                     const limiet = appConfig.limiet || 1000;
                     document.getElementById('totaalTekst').innerText = `${totaalMl} / ${limiet} ml`;
@@ -471,13 +459,11 @@
         function laadPeriodeOverzicht() {
             const start = document.getElementById('exportStart').value;
             const eind = document.getElementById('exportEind').value;
-
             fetch(`${WEB_APP_URL}?actie=getTotaalOverzicht&start=${start}&eind=${eind}`)
                 .then(res => res.json())
                 .then(items => {
                     const tbody = document.getElementById('totaalOverzichtTbody');
                     tbody.innerHTML = '';
-
                     if (!items || items.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">Geen data in deze periode</td></tr>`;
                     } else {
@@ -499,7 +485,6 @@
         function exporteerData(formaat) {
             const start = document.getElementById('exportStart').value;
             const eind = document.getElementById('exportEind').value;
-
             fetch(WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ actie: 'exporteerEtenDrinken', start: start, eind: eind, formaat: formaat })
@@ -512,23 +497,16 @@
         function slaConfigOp() {
             const nieuweLimiet = parseInt(document.getElementById('configLimiet').value) || 1000;
             appConfig.limiet = nieuweLimiet;
-
-            const payload = {
-                actie: 'updateConfig',
-                limiet: nieuweLimiet,
-                dranken: appConfig.dranken,
-                hoeveelheden: appConfig.hoeveelheden,
-                eten: appConfig.eten,
-                eenheden: appConfig.eenheden
-            };
-
-            fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) })
-                .then(res => res.json())
-                .then(res => {
-                    toonStatus(res.message);
-                    laadDagOverzicht();
-                })
-                .catch(err => toonStatus("Fout bij opslaan config", true));
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ actie: 'updateConfig', ...appConfig })
+            })
+            .then(res => res.json())
+            .then(res => {
+                toonStatus(res.message);
+                laadDagOverzicht();
+            })
+            .catch(err => toonStatus("Fout bij opslaan config", true));
         }
     </script>
 </body>
