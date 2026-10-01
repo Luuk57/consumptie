@@ -48,11 +48,11 @@
 
         <!-- TAB 1: Eten Invoeren -->
         <div id="section-eten" class="tab-content bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🍽️ Eten Invoeren (Snelkeuze)</h2>
+            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🍽️ Eten Invoeren (Multi-Snelkeuze)</h2>
             
             <div>
                 <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Product</label>
+                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Product(en) - Meerdere mogelijk</label>
                     <button onclick="vraagNieuweSnelkeuze('eten', 'Nieuw eten product:')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Product Toevoegen</button>
                 </div>
                 <div id="etenProductKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
@@ -68,7 +68,7 @@
 
             <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex justify-between items-center text-sm">
                 <div><span class="font-bold text-slate-600">Geselecteerd:</span> <span id="geselecteerdEtenLabel" class="text-sky-700 font-bold">Nog niks gekozen</span></div>
-                <button onclick="voegEtenToeAanLijst()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">+ Toevoegen</button>
+                <button onclick="voegEtenToeAanLijst()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">+ Toevoegen aan lijst</button>
             </div>
 
             <div>
@@ -88,11 +88,11 @@
 
         <!-- TAB 2: Drinken Invoeren -->
         <div id="section-dranken" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🥤 Drinken Invoeren (Snelkeuze)</h2>
+            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🥤 Drinken Invoeren (Multi-Snelkeuze)</h2>
             
             <div>
                 <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Drankje</label>
+                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Drankje(s) - Meerdere mogelijk</label>
                     <button onclick="vraagNieuweSnelkeuze('dranken', 'Nieuw drankje:')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Drankje Toevoegen</button>
                 </div>
                 <div id="drankTypeKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
@@ -108,7 +108,7 @@
 
             <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex justify-between items-center text-sm">
                 <div><span class="font-bold text-slate-600">Geselecteerd:</span> <span id="geselecteerdDrankLabel" class="text-sky-700 font-bold">Nog niks gekozen</span></div>
-                <button onclick="voegDrankToeAanLijst()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">+ Toevoegen</button>
+                <button onclick="voegDrankToeAanLijst()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">+ Toevoegen aan lijst</button>
             </div>
 
             <div>
@@ -207,11 +207,12 @@
             eenheden: []
         };
 
-        let gekozenEtenProduct = '';
+        // Multi-select variabelen
+        let gekozenEtenProducten = [];
         let gekozenEtenEenheid = '';
         let teVerzendenEten = [];
 
-        let gekozenDrankType = '';
+        let gekozenDrankTypes = [];
         let gekozenDrankMl = '';
         let teVerzendenDranken = [];
 
@@ -265,25 +266,25 @@
             const prodContainer = document.getElementById('etenProductKnoppen');
             prodContainer.innerHTML = '';
             appConfig.eten.forEach(item => {
-                prodContainer.innerHTML += `<button onclick="selecteerEtenProduct('${item}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
+                prodContainer.innerHTML += `<button type="button" onclick="toggleEtenProduct('${item}', this)" data-val="${item}" class="eten-prod-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
             });
 
             const eenheidContainer = document.getElementById('etenEenheidKnoppen');
             eenheidContainer.innerHTML = '';
             appConfig.eenheden.forEach(item => {
-                eenheidContainer.innerHTML += `<button onclick="selecteerEtenEenheid('${item}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
+                eenheidContainer.innerHTML += `<button type="button" onclick="selecteerEtenEenheid('${item}', this)" data-val="${item}" class="eten-eenh-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
             });
 
             const drankContainer = document.getElementById('drankTypeKnoppen');
             drankContainer.innerHTML = '';
             appConfig.dranken.forEach(item => {
-                drankContainer.innerHTML += `<button onclick="selecteerDrankType('${item}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
+                drankContainer.innerHTML += `<button type="button" onclick="toggleDrankType('${item}', this)" data-val="${item}" class="drank-type-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
             });
 
             const mlContainer = document.getElementById('drankMlKnoppen');
             mlContainer.innerHTML = '';
             appConfig.hoeveelheden.forEach(ml => {
-                mlContainer.innerHTML += `<button onclick="selecteerDrankMl('${ml}', this)" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${ml} ml</button>`;
+                mlContainer.innerHTML += `<button type="button" onclick="selecteerDrankMl('${ml}', this)" data-val="${ml}" class="drank-ml-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${ml} ml</button>`;
             });
         }
 
@@ -303,27 +304,45 @@
             .catch(err => toonStatus("Fout bij toevoegen: " + err, true));
         }
 
-        function selecteerEtenProduct(prod, btn) {
-            gekozenEtenProduct = prod;
-            document.querySelectorAll('#etenProductKnoppen button').forEach(b => b.className = "p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            btn.className = "p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
+        // Multi-select logica Eten Producten
+        function toggleEtenProduct(prod, btn) {
+            const index = gekozenEtenProducten.indexOf(prod);
+            if (index > -1) {
+                gekozenEtenProducten.splice(index, 1);
+                btn.className = "eten-prod-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center";
+            } else {
+                gekozenEtenProducten.push(prod);
+                btn.className = "eten-prod-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
+            }
             updateEtenLabel();
         }
 
         function selecteerEtenEenheid(eenheid, btn) {
             gekozenEtenEenheid = eenheid;
-            document.querySelectorAll('#etenEenheidKnoppen button').forEach(b => b.className = "p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            btn.className = "p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
+            document.querySelectorAll('.eten-eenh-btn').forEach(b => b.className = "eten-eenh-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
+            btn.className = "eten-eenh-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
             updateEtenLabel();
         }
 
         function updateEtenLabel() {
-            document.getElementById('geselecteerdEtenLabel').innerText = (gekozenEtenProduct || 'Kies product') + ' (' + (gekozenEtenEenheid || 'kies eenheid') + ')';
+            const prods = gekozenEtenProducten.length > 0 ? gekozenEtenProducten.join(', ') : 'Geen producten gekozen';
+            const eenh = gekozenEtenEenheid || 'geen eenheid';
+            document.getElementById('geselecteerdEtenLabel').innerText = `${prods} (${eenh})`;
         }
 
         function voegEtenToeAanLijst() {
-            if (!gekozenEtenProduct || !gekozenEtenEenheid) return toonStatus("Kies eerst zowel een product als een hoeveelheid/eenheid.", true);
-            teVerzendenEten.push({ produkt: gekozenEtenProduct, hoeveelheid: gekozenEtenEenheid });
+            if (gekozenEtenProducten.length === 0 || !gekozenEtenEenheid) {
+                return toonStatus("Kies minimaal één product én een hoeveelheid/eenheid.", true);
+            }
+            // Voeg alle geselecteerde producten toe met dezelfde eenheid
+            gekozenEtenProducten.forEach(prod => {
+                teVerzendenEten.push({ produkt: prod, hoeveelheid: gekozenEtenEenheid });
+            });
+
+            // Reset selectie
+            gekozenEtenProducten = [];
+            document.querySelectorAll('.eten-prod-btn').forEach(b => b.className = "eten-prod-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
+            updateEtenLabel();
             renderEtenLijst();
         }
 
@@ -339,27 +358,45 @@
             });
         }
 
-        function selecteerDrankType(type, btn) {
-            gekozenDrankType = type;
-            document.querySelectorAll('#drankTypeKnoppen button').forEach(b => b.className = "p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            btn.className = "p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
+        // Multi-select logica Dranken Types
+        function toggleDrankType(type, btn) {
+            const index = gekozenDrankTypes.indexOf(type);
+            if (index > -1) {
+                gekozenDrankTypes.splice(index, 1);
+                btn.className = "drank-type-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center";
+            } else {
+                gekozenDrankTypes.push(type);
+                btn.className = "drank-type-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
+            }
             updateDrankLabel();
         }
 
         function selecteerDrankMl(ml, btn) {
             gekozenDrankMl = ml;
-            document.querySelectorAll('#drankMlKnoppen button').forEach(b => b.className = "p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            btn.className = "p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
+            document.querySelectorAll('.drank-ml-btn').forEach(b => b.className = "drank-ml-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
+            btn.className = "drank-ml-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
             updateDrankLabel();
         }
 
         function updateDrankLabel() {
-            document.getElementById('geselecteerdDrankLabel').innerText = (gekozenDrankType || 'Kies drankje') + ' - ' + (gekozenDrankMl ? gekozenDrankMl + ' ml' : 'kies ml');
+            const types = gekozenDrankTypes.length > 0 ? gekozenDrankTypes.join(', ') : 'Geen drankjes gekozen';
+            const ml = gekozenDrankMl ? gekozenDrankMl + ' ml' : 'geen ml';
+            document.getElementById('geselecteerdDrankLabel').innerText = `${types} - ${ml}`;
         }
 
         function voegDrankToeAanLijst() {
-            if (!gekozenDrankType || !gekozenDrankMl) return toonStatus("Kies eerst zowel een drankje als een hoeveelheid in ml.", true);
-            teVerzendenDranken.push({ drank: gekozenDrankType, hoeveelheid: gekozenDrankMl });
+            if (gekozenDrankTypes.length === 0 || !gekozenDrankMl) {
+                return toonStatus("Kies minimaal één drankje én een hoeveelheid in ml.", true);
+            }
+            // Voeg alle geselecteerde drankjes toe met dezelfde ml
+            gekozenDrankTypes.forEach(drank => {
+                teVerzendenDranken.push({ drank: drank, hoeveelheid: gekozenDrankMl });
+            });
+
+            // Reset selectie
+            gekozenDrankTypes = [];
+            document.querySelectorAll('.drank-type-btn').forEach(b => b.className = "drank-type-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
+            updateDrankLabel();
             renderDrankLijst();
         }
 
@@ -375,7 +412,6 @@
             });
         }
 
-        // Eten opslaan met actieve visuele feedback (kleurwissel & blokkade tegen dubbelklik)
         function slaEtenOp() {
             if (teVerzendenEten.length === 0) return toonStatus("Voeg minimaal één item toe aan de lijst.", true);
 
@@ -396,7 +432,6 @@
                 renderEtenLijst();
                 laadDagOverzicht();
                 
-                // Knop weer herstellen naar normaal
                 btn.disabled = false;
                 btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
                 btn.innerText = "Alles Opslaan naar Google Sheet";
@@ -409,7 +444,6 @@
             });
         }
 
-        // Drinken opslaan met actieve visuele feedback (kleurwissel & blokkade tegen dubbelklik)
         function slaDrankenOp() {
             if (teVerzendenDranken.length === 0) return toonStatus("Voeg minimaal één drankje toe aan de lijst.", true);
 
@@ -430,7 +464,6 @@
                 renderDrankLijst();
                 laadDagOverzicht();
 
-                // Knop weer herstellen naar normaal
                 btn.disabled = false;
                 btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
                 btn.innerText = "Alles Opslaan naar Google Sheet";
