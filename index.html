@@ -3,577 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasker - Vocht Monitor & Eten/Drinken</title>
-    <!-- Tailwind CSS voor modern design -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <meta name="theme-color" content="#0284c7">
+    <title>Tasker - Eten & Drinken</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 8px;
+            height: 25px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #2ecc71;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            line-height: 25px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        #statusMelding {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <!-- Header -->
-    <header class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-wide flex items-center gap-2">
-                💧 Tasker - Vocht Monitor
-            </h1>
-            <span class="text-xs bg-sky-800 px-2 py-1 rounded-full text-sky-200">Eten & Drinken Module</span>
-        </div>
-    </header>
+<div class="container">
+    <h1>🍎 Eten & Drinken (Google Sync)</h1>
+    <div id="statusMelding" style="color: #27ae60;">Klaar om te synchroniseren</div>
 
-    <!-- Main Container -->
-    <main class="max-w-4xl w-full mx-auto p-4 flex-grow space-y-6 pb-20">
+    <!-- Vochtmonitor Sectie -->
+    <div class="section">
+        <h3>Vochtmonitor Vandaag</h3>
+        <label for="dagLimiet">Dagelijks Vochtlimiet (ml):</label>
+        <input type="number" id="dagLimiet" value="1000" onchange="slaLimietOp()">
 
-        <!-- Status / Meldingen -->
-        <div id="statusMessage" class="hidden p-4 rounded-xl text-sm font-medium transition-all shadow-sm"></div>
-
-        <!-- Drinken Totaal / Progressbar -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-3">
-            <div class="flex justify-between items-center">
-                <span class="text-sm font-bold text-slate-700 uppercase tracking-wide">Drinken Totaal Vandaag</span>
-                <span id="totaalTekst" class="text-sm font-extrabold text-sky-700">0 / 1000 ml</span>
-            </div>
-            <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden p-0.5 border border-slate-200">
-                <div id="progressBar" class="bg-sky-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-            </div>
-        </section>
-
-        <!-- Modus / Tabs -->
-        <div class="grid grid-cols-5 gap-1 bg-slate-200 p-1.5 rounded-2xl text-xs font-bold text-center">
-            <button onclick="switchTab('eten')" id="tab-eten" class="py-2.5 rounded-xl bg-white text-sky-700 shadow-sm transition">🍽 Eten</button>
-            <button onclick="switchTab('dranken')" id="tab-dranken" class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition">🥤 Drinken</button>
-            <button onclick="switchTab('vandaag')" id="tab-vandaag" class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition">📅 Vandaag</button>
-            <button onclick="switchTab('overzicht')" id="tab-overzicht" class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition">📊 Overzicht</button>
-            <button onclick="switchTab('config')" id="tab-config" class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition">⚙️ Config</button>
+        <label>Voortgang Vochtinename:</label>
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar">0 ml</div>
         </div>
 
-        <!-- TAB 1: Eten Invoeren -->
-        <div id="section-eten" class="tab-content bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🍽️ Eten Invoeren (Multi-Snelkeuze)</h2>
-            
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Product(en) - Meerdere mogelijk</label>
-                    <button onclick="vraagNieuweSnelkeuze('eten', 'Nieuw eten product:')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Product Toevoegen</button>
-                </div>
-                <div id="etenProductKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-            </div>
+        <label for="vochtInvoer">Vocht toevoegen (ml):</label>
+        <input type="number" id="vochtInvoer" placeholder="Bijv. 250">
+        <button onclick="voegVochtToe()">Voeg toe & Synchroniseer</button>
+        <button onclick="resetVocht()" style="background-color: #e74c3c;">Reset Vandaag</button>
+    </div>
 
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-semibold uppercase text-slate-500">2. Kies Hoeveelheid / Eenheid</label>
-                    <button onclick="vraagNieuweSnelkeuze('eenheden', 'Nieuwe eenheid (bijv. Kom):')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Eenheid Toevoegen</button>
-                </div>
-                <div id="etenEenheidKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-            </div>
+    <!-- Eten / Maaltijden Sectie -->
+    <div class="section">
+        <h3>Maaltijden & Dieet Notities</h3>
+        <label for="maaltijdInput">Wat heb je gegeten?</label>
+        <textarea id="maaltijdInput" rows="3" placeholder="Noteer je maaltijd..."></textarea>
+        <button onclick="slaMaaltijdOp()">Maaltijd Opslaan & Synchroniseer</button>
+    </div>
+</div>
 
-            <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex justify-between items-center text-sm">
-                <div><span class="font-bold text-slate-600">Geselecteerd:</span> <span id="geselecteerdEtenLabel" class="text-sky-700 font-bold">Nog niks gekozen</span></div>
-                <button onclick="voegEtenToeAanLijst()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">+ Toevoegen aan lijst</button>
-            </div>
+<script>
+    // Jouw unieke Google Apps Script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxjKWvAzZo-uNtbQtwSjV9MhwRMbxf8t6lyiNafbjgXuYKSjEVFSwZKZw-IHgL62eHw/exec";
 
-            <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Te verzenden items:</label>
-                <div id="etenGekozenLijst" class="bg-slate-50 border border-slate-200 rounded-xl p-3 min-h-[50px] space-y-2">
-                    <span class="text-xs text-slate-400 italic">Nog geen items toegevoegd</span>
-                </div>
-            </div>
+    let totaalVocht = parseInt(localStorage.getItem('totaalVocht')) || 0;
 
-            <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Bijzonderheden</label>
-                <input type="text" id="etenNotitie" placeholder="Eventuele opmerkingen..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
-            </div>
+    function init() {
+        document.getElementById('dagLimiet').value = localStorage.getItem('dagLimiet') || 1000;
+        updateVochtUI();
+    }
 
-            <button id="btnSlaEten" onclick="slaEtenOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition">Alles Opslaan naar Google Sheet</button>
-        </div>
+    function slaLimietOp() {
+        let limiet = parseInt(document.getElementById('dagLimiet').value) || 1000;
+        localStorage.setItem('dagLimiet', limiet);
+        updateVochtUI();
+    }
 
-        <!-- TAB 2: Drinken Invoeren -->
-        <div id="section-dranken" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">🥤 Drinken Invoeren (Multi-Snelkeuze)</h2>
-            
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-semibold uppercase text-slate-500">1. Kies Drankje(s) - Meerdere mogelijk</label>
-                    <button onclick="vraagNieuweSnelkeuze('dranken', 'Nieuw drankje:')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Drankje Toevoegen</button>
-                </div>
-                <div id="drankTypeKnoppen" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-            </div>
-
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-semibold uppercase text-slate-500">2. Kies Hoeveelheid (ml)</label>
-                    <button onclick="vraagNieuweSnelkeuze('hoeveelheden', 'Nieuwe hoeveelheid in ml (bijv. 350):')" class="text-xs bg-sky-100 text-sky-700 font-bold px-2.5 py-1 rounded-lg hover:bg-sky-200 transition">+ Aantal ml Toevoegen</button>
-                </div>
-                <div id="drankMlKnoppen" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
-            </div>
-
-            <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex justify-between items-center text-sm">
-                <div><span class="font-bold text-slate-600">Geselecteerd:</span> <span id="geselecteerdDrankLabel" class="text-sky-700 font-bold">Nog niks gekozen</span></div>
-                <button onclick="voegDrankToeAanLijst()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">+ Toevoegen aan lijst</button>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Te verzenden drankjes:</label>
-                <div id="drankGekozenLijst" class="bg-slate-50 border border-slate-200 rounded-xl p-3 min-h-[50px] space-y-2">
-                    <span class="text-xs text-slate-400 italic">Nog geen drankjes toegevoegd</span>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Bijzonderheden</label>
-                <input type="text" id="drankNotitie" placeholder="Eventuele opmerkingen..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
-            </div>
-
-            <button id="btnSlaDranken" onclick="slaDrankenOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition">Alles Opslaan naar Google Sheet</button>
-        </div>
-
-        <!-- TAB 3: Vandaag Overzicht -->
-        <div id="section-vandaag" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">📅 Dag Overzicht</h2>
-            <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Kies Datum</label>
-                <input type="date" id="dagOverzichtDatum" onchange="laadDagOverzicht()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="border-b text-slate-500 uppercase text-xs">
-                            <th class="py-2 px-2">Datum/Tijd</th>
-                            <th class="py-2 px-2">Type</th>
-                            <th class="py-2 px-2">Item</th>
-                            <th class="py-2 px-2">Hoeveelheid</th>
-                            <th class="py-2 px-2 text-right">Actie</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dagOverzichtTbody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB 4: Periode Overzicht & Exporteren -->
-        <div id="section-overzicht" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">📊 Periode Overzicht & Exporteren</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Startdatum</label>
-                    <input type="date" id="exportStart" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Einddatum</label>
-                    <input type="date" id="exportEind" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="laadPeriodeOverzicht()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition text-sm">Overzicht Tonen</button>
-                <button onclick="exporteerData('pdf')" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl transition text-sm">Exporteer PDF</button>
-                <button onclick="exporteerData('excel')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-sm">Exporteer Excel</button>
-            </div>
-            <div class="overflow-x-auto pt-3">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="border-b text-slate-500 uppercase text-xs">
-                            <th class="py-2 px-2">Datum/Tijd</th>
-                            <th class="py-2 px-2">Type</th>
-                            <th class="py-2 px-2">Item</th>
-                            <th class="py-2 px-2">Hoeveelheid</th>
-                            <th class="py-2 px-2">Notitie</th>
-                        </tr>
-                    </thead>
-                    <tbody id="totaalOverzichtTbody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB 5: Configuratie -->
-        <div id="section-config" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-700 border-b pb-2">⚙️ Instellingen & Limieten</h2>
-            <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Dagelijkse Vochtlimiet (ml)</label>
-                <input type="number" id="configLimiet" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
-            </div>
-            <button onclick="slaConfigOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl transition">Instellingen Opslaan</button>
-        </div>
-
-    </main>
-
-    <!-- JavaScript Logica -->
-    <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDfu_rRicy4pWBfFpim4Og71oduJv_G71kD4xoiAiVIo2jOxdzwKHwstbhmjhubAAi3Q/exec";
-
-        let appConfig = {
-            limiet: 1000,
-            dranken: [],
-            hoeveelheden: [],
-            eten: [],
-            eenheden: []
-        };
-
-        // Multi-select variabelen
-        let gekozenEtenProducten = [];
-        let gekozenEtenEenheid = '';
-        let teVerzendenEten = [];
-
-        let gekozenDrankTypes = [];
-        let gekozenDrankMl = '';
-        let teVerzendenDranken = [];
-
-        window.onload = function() {
-            const vandaag = new Date().toISOString().split('T')[0];
-            document.getElementById('dagOverzichtDatum').value = vandaag;
-            document.getElementById('exportStart').value = vandaag;
-            document.getElementById('exportEind').value = vandaag;
-
-            laadConfig();
-        };
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('section-' + tabId).classList.remove('hidden');
-
-            document.querySelectorAll('.grid.grid-cols-5 button').forEach(btn => {
-                btn.className = "py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition";
-            });
-            document.getElementById('tab-' + tabId).className = "py-2.5 rounded-xl bg-white text-sky-700 shadow-sm transition";
-
-            if (tabId === 'vandaag') laadDagOverzicht();
+    function voegVochtToe() {
+        let invoer = parseInt(document.getElementById('vochtInvoer').value);
+        if (isNaN(invoer) || invoer <= 0) {
+            alert("Vul een geldig aantal milliliters in.");
+            return;
         }
 
-        function toonStatus(bericht, isFout = false) {
-            const el = document.getElementById('statusMessage');
-            el.innerText = bericht;
-            el.className = `p-4 rounded-xl text-sm font-medium transition-all shadow-sm ${isFout ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}`;
-            el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 4000);
+        totaalVocht += invoer;
+        localStorage.setItem('totaalVocht', totaalVocht);
+        updateVochtUI();
+        
+        // Data naar Google Spreadsheet sturen
+        stuurNaarGoogle("Drinken", invoer, "Vochtinname");
+        document.getElementById('vochtInvoer').value = '';
+    }
+
+    function slaMaaltijdOp() {
+        let tekst = document.getElementById('maaltijdInput').value.trim();
+        if (tekst === '') {
+            alert("Vul eerst een maaltijd of notitie in.");
+            return;
         }
 
-        function laadConfig() {
-            fetch(`${WEB_APP_URL}?actie=getConfig`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data) {
-                        appConfig = data;
-                        document.getElementById('configLimiet').value = appConfig.limiet || 1000;
-                    }
-                    bouwSnelkeuzes();
-                    laadDagOverzicht();
-                })
-                .catch(err => {
-                    console.warn("Fout bij laden config:", err);
-                    bouwSnelkeuzes();
-                });
+        // Data naar Google Spreadsheet sturen
+        stuurNaarGoogle("Eten", 0, tekst);
+        document.getElementById('maaltijdInput').value = '';
+    }
+
+    function resetVocht() {
+        totaalVocht = 0;
+        localStorage.setItem('totaalVocht', totaalVocht);
+        updateVochtUI();
+        stuurNaarGoogle("Reset", 0, "Vocht gereset");
+    }
+
+    function updateVochtUI() {
+        let limiet = parseInt(document.getElementById('dagLimiet').value) || 1000;
+        let bar = document.getElementById('progressBar');
+        let percentage = Math.min((totaalVocht / limiet) * 100, 100);
+
+        bar.style.width = percentage + '%';
+        bar.textContent = totaalVocht + ' ml / ' + limiet + ' ml';
+
+        if (percentage >= 100) {
+            bar.style.backgroundColor = '#e74c3c'; // Rood
+        } else if (percentage >= 80) {
+            bar.style.backgroundColor = '#e67e22'; // Oranje
+        } else {
+            bar.style.backgroundColor = '#2ecc71'; // Groen
         }
+    }
 
-        function bouwSnelkeuzes() {
-            const prodContainer = document.getElementById('etenProductKnoppen');
-            prodContainer.innerHTML = '';
-            appConfig.eten.forEach(item => {
-                prodContainer.innerHTML += `<button type="button" onclick="toggleEtenProduct('${item}', this)" data-val="${item}" class="eten-prod-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
-            });
+    function stuurNaarGoogle(type, invoer, notitie) {
+        let status = document.getElementById('statusMelding');
+        status.textContent = "Bezig met synchroniseren naar Google...";
+        status.style.color = "#e67e22";
 
-            const eenheidContainer = document.getElementById('etenEenheidKnoppen');
-            eenheidContainer.innerHTML = '';
-            appConfig.eenheden.forEach(item => {
-                eenheidContainer.innerHTML += `<button type="button" onclick="selecteerEtenEenheid('${item}', this)" data-val="${item}" class="eten-eenh-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
-            });
+        let datum = new Date().toLocaleString();
 
-            const drankContainer = document.getElementById('drankTypeKnoppen');
-            drankContainer.innerHTML = '';
-            appConfig.dranken.forEach(item => {
-                drankContainer.innerHTML += `<button type="button" onclick="toggleDrankType('${item}', this)" data-val="${item}" class="drank-type-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${item}</button>`;
-            });
+        let formData = new URLSearchParams();
+        formData.append('datum', datum);
+        formData.append('type', type);
+        formData.append('invoer', invoer);
+        formData.append('notitie', notitie);
 
-            const mlContainer = document.getElementById('drankMlKnoppen');
-            mlContainer.innerHTML = '';
-            appConfig.hoeveelheden.forEach(ml => {
-                mlContainer.innerHTML += `<button type="button" onclick="selecteerDrankMl('${ml}', this)" data-val="${ml}" class="drank-ml-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center">${ml} ml</button>`;
-            });
-        }
-
-        function vraagNieuweSnelkeuze(categorie, vraagTekst) {
-            const waarde = prompt(vraagTekst);
-            if (!waarde || !waarde.trim()) return;
-
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ actie: 'voegSnelkeuzeToe', categorie: categorie, waarde: waarde.trim() })
+        // Fetch verzoek naar de Google Spreadsheet script URL
+        fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
+            .then(() => {
+                status.textContent = "✔ Succesvol gesynchroniseerd met Google Drive!";
+                status.style.color = "#27ae60";
+                setTimeout(() => { status.textContent = "Klaar om te synchroniseren"; }, 4000);
             })
-            .then(res => res.json())
-            .then(res => {
-                toonStatus(res.message);
-                laadConfig();
-            })
-            .catch(err => toonStatus("Fout bij toevoegen: " + err, true));
-        }
-
-        // Multi-select logica Eten Producten
-        function toggleEtenProduct(prod, btn) {
-            const index = gekozenEtenProducten.indexOf(prod);
-            if (index > -1) {
-                gekozenEtenProducten.splice(index, 1);
-                btn.className = "eten-prod-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center";
-            } else {
-                gekozenEtenProducten.push(prod);
-                btn.className = "eten-prod-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
-            }
-            updateEtenLabel();
-        }
-
-        function selecteerEtenEenheid(eenheid, btn) {
-            gekozenEtenEenheid = eenheid;
-            document.querySelectorAll('.eten-eenh-btn').forEach(b => b.className = "eten-eenh-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            btn.className = "eten-eenh-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
-            updateEtenLabel();
-        }
-
-        function updateEtenLabel() {
-            const prods = gekozenEtenProducten.length > 0 ? gekozenEtenProducten.join(', ') : 'Geen producten gekozen';
-            const eenh = gekozenEtenEenheid || 'geen eenheid';
-            document.getElementById('geselecteerdEtenLabel').innerText = `${prods} (${eenh})`;
-        }
-
-        function voegEtenToeAanLijst() {
-            if (gekozenEtenProducten.length === 0 || !gekozenEtenEenheid) {
-                return toonStatus("Kies minimaal één product én een hoeveelheid/eenheid.", true);
-            }
-            // Voeg alle geselecteerde producten toe met dezelfde eenheid
-            gekozenEtenProducten.forEach(prod => {
-                teVerzendenEten.push({ produkt: prod, hoeveelheid: gekozenEtenEenheid });
+            .catch(error => {
+                status.textContent = "⚠ Fout bij synchroniseren.";
+                status.style.color = "#e74c3c";
+                console.error('Error!', error.message);
             });
+    }
 
-            // Reset selectie
-            gekozenEtenProducten = [];
-            document.querySelectorAll('.eten-prod-btn').forEach(b => b.className = "eten-prod-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            updateEtenLabel();
-            renderEtenLijst();
-        }
+    window.onload = init;
+</script>
 
-        function renderEtenLijst() {
-            const container = document.getElementById('etenGekozenLijst');
-            if (teVerzendenEten.length === 0) {
-                container.innerHTML = `<span class="text-xs text-slate-400 italic">Nog geen items toegevoegd</span>`;
-                return;
-            }
-            container.innerHTML = '';
-            teVerzendenEten.forEach((item, index) => {
-                container.innerHTML += `<div class="flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm"><span>${item.produkt} (${item.hoeveelheid})</span><button onclick="teVerzendenEten.splice(${index},1);renderEtenLijst();" class="text-red-500 text-xs font-bold">X</button></div>`;
-            });
-        }
-
-        // Multi-select logica Dranken Types
-        function toggleDrankType(type, btn) {
-            const index = gekozenDrankTypes.indexOf(type);
-            if (index > -1) {
-                gekozenDrankTypes.splice(index, 1);
-                btn.className = "drank-type-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center";
-            } else {
-                gekozenDrankTypes.push(type);
-                btn.className = "drank-type-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
-            }
-            updateDrankLabel();
-        }
-
-        function selecteerDrankMl(ml, btn) {
-            gekozenDrankMl = ml;
-            document.querySelectorAll('.drank-ml-btn').forEach(b => b.className = "drank-ml-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            btn.className = "drank-ml-btn p-2.5 rounded-xl border border-sky-500 bg-sky-600 text-white text-sm font-bold shadow-sm text-center";
-            updateDrankLabel();
-        }
-
-        function updateDrankLabel() {
-            const types = gekozenDrankTypes.length > 0 ? gekozenDrankTypes.join(', ') : 'Geen drankjes gekozen';
-            const ml = gekozenDrankMl ? gekozenDrankMl + ' ml' : 'geen ml';
-            document.getElementById('geselecteerdDrankLabel').innerText = `${types} - ${ml}`;
-        }
-
-        function voegDrankToeAanLijst() {
-            if (gekozenDrankTypes.length === 0 || !gekozenDrankMl) {
-                return toonStatus("Kies minimaal één drankje én een hoeveelheid in ml.", true);
-            }
-            // Voeg alle geselecteerde drankjes toe met dezelfde ml
-            gekozenDrankTypes.forEach(drank => {
-                teVerzendenDranken.push({ drank: drank, hoeveelheid: gekozenDrankMl });
-            });
-
-            // Reset selectie
-            gekozenDrankTypes = [];
-            document.querySelectorAll('.drank-type-btn').forEach(b => b.className = "drank-type-btn p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold hover:bg-sky-50 transition text-center");
-            updateDrankLabel();
-            renderDrankLijst();
-        }
-
-        function renderDrankLijst() {
-            const container = document.getElementById('drankGekozenLijst');
-            if (teVerzendenDranken.length === 0) {
-                container.innerHTML = `<span class="text-xs text-slate-400 italic">Nog geen drankjes toegevoegd</span>`;
-                return;
-            }
-            container.innerHTML = '';
-            teVerzendenDranken.forEach((item, index) => {
-                container.innerHTML += `<div class="flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm"><span>${item.drank} (${item.hoeveelheid} ml)</span><button onclick="teVerzendenDranken.splice(${index},1);renderDrankLijst();" class="text-red-500 text-xs font-bold">X</button></div>`;
-            });
-        }
-
-        function slaEtenOp() {
-            if (teVerzendenEten.length === 0) return toonStatus("Voeg minimaal één item toe aan de lijst.", true);
-
-            const btn = document.getElementById('btnSlaEten');
-            btn.disabled = true;
-            btn.className = "w-full bg-slate-400 text-white font-bold py-3.5 px-6 rounded-xl shadow-md cursor-not-allowed transition";
-            btn.innerText = "Bezig met opslaan...";
-
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ actie: 'slaInnameOp', type: 'eten', items: teVerzendenEten, notitie: document.getElementById('etenNotitie').value })
-            })
-            .then(res => res.json())
-            .then(res => {
-                toonStatus(res.message);
-                document.getElementById('etenNotitie').value = '';
-                teVerzendenEten = [];
-                renderEtenLijst();
-                laadDagOverzicht();
-                
-                btn.disabled = false;
-                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
-                btn.innerText = "Alles Opslaan naar Google Sheet";
-            })
-            .catch(err => {
-                toonStatus("Fout bij opslaan: " + err, true);
-                btn.disabled = false;
-                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
-                btn.innerText = "Alles Opslaan naar Google Sheet";
-            });
-        }
-
-        function slaDrankenOp() {
-            if (teVerzendenDranken.length === 0) return toonStatus("Voeg minimaal één drankje toe aan de lijst.", true);
-
-            const btn = document.getElementById('btnSlaDranken');
-            btn.disabled = true;
-            btn.className = "w-full bg-slate-400 text-white font-bold py-3.5 px-6 rounded-xl shadow-md cursor-not-allowed transition";
-            btn.innerText = "Bezig met opslaan...";
-
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ actie: 'slaInnameOp', type: 'dranken', items: teVerzendenDranken, notitie: document.getElementById('drankNotitie').value })
-            })
-            .then(res => res.json())
-            .then(res => {
-                toonStatus(res.message);
-                document.getElementById('drankNotitie').value = '';
-                teVerzendenDranken = [];
-                renderDrankLijst();
-                laadDagOverzicht();
-
-                btn.disabled = false;
-                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
-                btn.innerText = "Alles Opslaan naar Google Sheet";
-            })
-            .catch(err => {
-                toonStatus("Fout bij opslaan: " + err, true);
-                btn.disabled = false;
-                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
-                btn.innerText = "Alles Opslaan naar Google Sheet";
-            });
-        }
-
-        function laadDagOverzicht() {
-            const datum = document.getElementById('dagOverzichtDatum').value;
-            fetch(`${WEB_APP_URL}?actie=getDagOverzicht&datum=${datum}`)
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.getElementById('dagOverzichtTbody');
-                    tbody.innerHTML = '';
-                    if (!data.items || data.items.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">Geen registraties gevonden voor deze dag</td></tr>`;
-                    } else {
-                        data.items.forEach(i => {
-                            tbody.innerHTML += `
-                                <tr class="border-b">
-                                    <td class="py-2 px-2 text-xs text-slate-600">${i.datum}</td>
-                                    <td class="py-2 px-2 font-semibold">${i.type}</td>
-                                    <td class="py-2 px-2">${i.item}</td>
-                                    <td class="py-2 px-2">${i.hoeveelheid || '-'}</td>
-                                    <td class="py-2 px-2 text-right"><button onclick="verwijderItem('${i.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold">Verwijder</button></td>
-                                </tr>
-                            `;
-                        });
-                    }
-                    const totaalMl = data.totaalMl || 0;
-                    const limiet = appConfig.limiet || 1000;
-                    document.getElementById('totaalTekst').innerText = `${totaalMl} / ${limiet} ml`;
-                    let percentage = (totaalMl / limiet) * 100;
-                    if (percentage > 100) percentage = 100;
-                    document.getElementById('progressBar').style.width = percentage + '%';
-                })
-                .catch(err => console.warn("Fout bij ophalen dagoverzicht:", err));
-        }
-
-        function verwijderItem(id) {
-            if (!confirm("Weet je zeker dat je dit item wilt verwijderen?")) return;
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ actie: 'verwijderItem', id: id })
-            })
-            .then(res => res.json())
-            .then(res => {
-                toonStatus(res.message);
-                laadDagOverzicht();
-            })
-            .catch(err => toonStatus("Fout bij verwijderen", true));
-        }
-
-        function laadPeriodeOverzicht() {
-            const start = document.getElementById('exportStart').value;
-            const eind = document.getElementById('exportEind').value;
-            fetch(`${WEB_APP_URL}?actie=getTotaalOverzicht&start=${start}&eind=${eind}`)
-                .then(res => res.json())
-                .then(items => {
-                    const tbody = document.getElementById('totaalOverzichtTbody');
-                    tbody.innerHTML = '';
-                    if (!items || items.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">Geen data in deze periode</td></tr>`;
-                    } else {
-                        items.forEach(i => {
-                            tbody.innerHTML += `
-                                <tr class="border-b">
-                                    <td class="py-2 px-2 text-xs">${i.datum}</td>
-                                    <td class="py-2 px-2 font-semibold">${i.type}</td>
-                                    <td class="py-2 px-2">${i.item}</td>
-                                    <td class="py-2 px-2">${i.hoeveelheid || '-'}</td>
-                                    <td class="py-2 px-2 text-xs text-slate-500">${i.notitie || ''}</td>
-                                </tr>
-                            `;
-                        });
-                    }
-                });
-        }
-
-        function exporteerData(formaat) {
-            const start = document.getElementById('exportStart').value;
-            const eind = document.getElementById('exportEind').value;
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ actie: 'exporteerEtenDrinken', start: start, eind: eind, formaat: formaat })
-            })
-            .then(res => res.json())
-            .then(res => toonStatus(res.message))
-            .catch(err => toonStatus("Export fout: " + err, true));
-        }
-
-        function slaConfigOp() {
-            const nieuweLimiet = parseInt(document.getElementById('configLimiet').value) || 1000;
-            appConfig.limiet = nieuweLimiet;
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ actie: 'updateConfig', ...appConfig })
-            })
-            .then(res => res.json())
-            .then(res => {
-                toonStatus(res.message);
-                laadDagOverzicht();
-            })
-            .catch(err => toonStatus("Fout bij opslaan config", true));
-        }
-    </script>
 </body>
 </html>
