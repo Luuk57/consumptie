@@ -248,12 +248,10 @@
   <!-- TAB 1: ETEN -->
   <div id="tabEten" class="tab-content active">
     <h2>🍎 Eten Registreren</h2>
-    
     <div class="form-group">
       <label>Datum</label>
       <input type="date" id="etenDatum">
     </div>
-
     <div class="form-group">
       <label>Product (Meerdere selecties mogelijk)</label>
       <div id="etenChips" class="chip-container"></div>
@@ -262,7 +260,6 @@
         <button class="secondary-button" onclick="voegConfigToe('eten')">+</button>
       </div>
     </div>
-
     <div class="form-group">
       <label>Hoeveelheid / Maat (Bord, Portie, etc.)</label>
       <div id="eenheidChips" class="chip-container"></div>
@@ -271,24 +268,20 @@
         <button class="secondary-button" onclick="voegConfigToe('eenheden')">+</button>
       </div>
     </div>
-
     <div class="form-group">
       <label>Notitie</label>
       <input type="text" id="etenNotitie" placeholder="Bijv. Met extra boter...">
     </div>
-
     <button class="primary-button" onclick="slaEtenOp()">Eten Opslaan</button>
   </div>
 
   <!-- TAB 2: DRINKEN -->
   <div id="tabDrinken" class="tab-content">
     <h2>💧 Drinken Registreren</h2>
-    
     <div class="form-group">
       <label>Datum</label>
       <input type="date" id="drinkenDatum">
     </div>
-
     <div class="form-group">
       <label>Drankje (Meerdere selecties mogelijk)</label>
       <div id="drankChips" class="chip-container"></div>
@@ -297,7 +290,6 @@
         <button class="secondary-button" onclick="voegConfigToe('dranken')">+</button>
       </div>
     </div>
-
     <div class="form-group">
       <label>Hoeveelheid in ml (Kies snelkeuze of typ hieronder)</label>
       <div id="hoeveelheidChips" class="chip-container"></div>
@@ -306,12 +298,10 @@
         <button class="secondary-button" onclick="voegConfigToe('hoeveelheden')">+</button>
       </div>
     </div>
-
     <div class="form-group">
       <label>Notitie</label>
       <input type="text" id="drinkenNotitie" placeholder="Bijv. Met suiker...">
     </div>
-
     <button class="primary-button" onclick="slaDrinkenOp()">Drinken Opslaan</button>
   </div>
 
@@ -380,7 +370,6 @@
 </div>
 
 <script>
-  // Jouw gekoppelde Google Apps Script Web App URL
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzlyX0g7xgSS5eYF6-R0QJlLywflW4Gz9nmK7y30Ahet50tKbe-I9Ybud1TtKI7tKWw/exec";
   
   let appConfig = {
@@ -398,6 +387,12 @@
     for (let b of buttons) b.classList.remove('active');
     document.getElementById(tabName).classList.add('active');
     evt.currentTarget.classList.add('active');
+    
+    if (tabName === 'tabDagboek') {
+      laadDagOverzicht();
+    } else if (tabName === 'tabOverzicht') {
+      laadTotaalOverzicht();
+    }
   }
 
   function setVandaagDatums() {
@@ -563,15 +558,18 @@
 
   function laadDagOverzicht() {
     const datum = document.getElementById('overzichtDatumInput').value;
+    if (!datum) return;
+    
     fetch(WEB_APP_URL + `?actie=getDagOverzicht&datum=${datum}`)
       .then(res => res.json())
       .then(data => {
         const tbody = document.getElementById('dagboekBody');
         tbody.innerHTML = '';
         
-        const limiet = appConfig.limiet || 1000;
-        const totaal = data.totaalMl || 0;
+        const limiet = Number(appConfig.limiet) || 1000;
+        const totaal = Number(data.totaalMl) || 0;
         const pct = Math.min(Math.round((totaal / limiet) * 100), 100);
+        
         document.getElementById('progressText').textContent = `${totaal} / ${limiet} ml`;
         const fill = document.getElementById('progressBarFill');
         fill.style.width = pct + '%';
@@ -584,16 +582,21 @@
 
         data.items.forEach(item => {
           const tr = document.createElement('tr');
+          let tijdWeergave = item.datum;
+          if (item.datum && item.datum.length > 10) {
+            tijdWeergave = item.datum.substring(11, 16);
+          }
           tr.innerHTML = `
-            <td>${item.datum.substring(11, 16) || item.datum}</td>
+            <td>${tijdWeergave}</td>
             <td><strong>${item.type}</strong></td>
-            <td>${item.item}</td>
-            <td>${item.hoeveelheid} ${item.notitie ? '• ' + item.notitie : ''}</td>
+            <td>${item.item || ''}</td>
+            <td>${item.hoeveelheid || ''} ${item.notitie ? '• ' + item.notitie : ''}</td>
             <td><button class="danger-btn" onclick="verwijderItem('${item.id}')">Verwijder</button></td>
           `;
           tbody.appendChild(tr);
         });
-      });
+      })
+      .catch(err => console.warn("Fout bij laden dagoverzicht:", err));
   }
 
   function verwijderItem(id) {
@@ -624,15 +627,16 @@
         items.forEach(i => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${i.datum.substring(0, 10)}</td>
-            <td>${i.type}</td>
-            <td>${i.item}</td>
-            <td>${i.hoeveelheid}</td>
+            <td>${i.datum ? i.datum.substring(0, 10) : ''}</td>
+            <td>${i.type || ''}</td>
+            <td>${i.item || ''}</td>
+            <td>${i.hoeveelheid || ''}</td>
             <td>${i.notitie || ''}</td>
           `;
           tbody.appendChild(tr);
         });
-      });
+      })
+      .catch(err => console.warn("Fout bij totaal overzicht:", err));
   }
 
   function exporteerData(formaat) {
