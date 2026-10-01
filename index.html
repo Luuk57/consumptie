@@ -116,9 +116,9 @@
     .chip {
       background: #f1f5f9;
       border: 1px solid var(--border-color);
-      padding: 6px 12px;
+      padding: 8px 14px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
       user-select: none;
       transition: all 0.2s;
@@ -127,6 +127,7 @@
       background: var(--primary);
       color: white;
       border-color: var(--primary);
+      font-weight: 600;
     }
 
     .primary-button {
@@ -149,7 +150,7 @@
       padding: 10px 14px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
     }
 
@@ -298,9 +299,12 @@
     </div>
 
     <div class="form-group">
-      <label>Hoeveelheid in ml (Snelkeuze of eigen waarde)</label>
+      <label>Hoeveelheid in ml (Kies snelkeuze of typ hieronder)</label>
       <div id="hoeveelheidChips" class="chip-container"></div>
-      <input type="number" id="customMlInput" placeholder="Of typ aantal ml..." style="margin-top:6px;">
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input type="number" id="customMlInput" placeholder="Of typ aantal ml (bijv. 175)...">
+        <button class="secondary-button" onclick="voegConfigToe('hoeveelheden')">+</button>
+      </div>
     </div>
 
     <div class="form-group">
@@ -337,7 +341,7 @@
   <!-- TAB 4: TOTAAL OVERZICHT & EXPORT -->
   <div id="tabOverzicht" class="tab-content">
     <h2>📊 Periode Overzicht & Exporteren</h2>
-    <div class="form-row" style="display:flex; gap:10px; margin-bottom:12px;">
+    <div style="display:flex; gap:10px; margin-bottom:12px;">
       <div class="form-group" style="flex:1;"><label>Startdatum</label><input type="date" id="exportStart"></div>
       <div class="form-group" style="flex:1;"><label>Einddatum</label><input type="date" id="exportEind"></div>
     </div>
@@ -371,13 +375,19 @@
       <label>Dagelijkse Limiet Drinken (ml)</label>
       <input type="number" id="configLimiet">
     </div>
-    <button class="primary-button" onclick="slaConfigOp()">Instellingen Opslaan</button>
+    <button class="primary-button" onclick="slaConfigOp()">Limiet Opslaan</button>
   </div>
 </div>
 
 <script>
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzlyX0g7xgSS5eYF6-R0QJlLywflW4Gz9nmK7y30Ahet50tKbe-I9Ybud1TtKI7tKWw/exec";
-  let appConfig = {};
+  let appConfig = {
+    limiet: 1000,
+    dranken: ['Koffie', 'Thee', 'Water', 'Soep', 'Melk'],
+    hoeveelheden: [50, 100, 150, 200, 250, 300],
+    eten: ['Brood', 'Fruit', 'Yoghurt', 'Koek', 'Warme Maaltijd'],
+    eenheden: ['Portie', 'Plak', 'Stuk', 'Kom', 'Bord']
+  };
 
   function openTab(evt, tabName) {
     const contents = document.getElementsByClassName('tab-content');
@@ -401,20 +411,36 @@
     fetch(WEB_APP_URL + "?actie=getConfig")
       .then(res => res.json())
       .then(data => {
-        appConfig = data;
-        document.getElementById('configLimiet').value = data.limiet;
-        bouwChips('etenChips', data.eten, true);
-        bouwChips('eenheidChips', data.eenheden, false);
-        bouwChips('drankChips', data.dranken, true);
-        bouwChips('hoeveelheidChips', data.hoeveelheden, false);
+        if (data && data.dranken) {
+          appConfig = data;
+        }
+        document.getElementById('configLimiet').value = appConfig.limiet || 1000;
+        bouwChips('etenChips', appConfig.eten, true);
+        bouwChips('eenheidChips', appConfig.eenheden, false);
+        bouwChips('drankChips', appConfig.dranken, true);
+        bouwChips('hoeveelheidChips', appConfig.hoeveelheden, false);
         laadDagOverzicht();
       })
-      .catch(err => console.warn("Fout bij laden config:", err));
+      .catch(err => {
+        console.warn("Kon config niet laden, gebruik standaard:", err);
+        bouwChips('etenChips', appConfig.eten, true);
+        bouwChips('eenheidChips', appConfig.eenheden, false);
+        bouwChips('drankChips', appConfig.dranken, true);
+        bouwChips('hoeveelheidChips', appConfig.hoeveelheden, false);
+        laadDagOverzicht();
+      });
   }
 
   function bouwChips(containerId, items, multiSelect) {
     const container = document.getElementById(containerId);
+    if (!container) return;
     container.innerHTML = '';
+    
+    if (!items || items.length === 0) {
+      container.innerHTML = '<span style="color:var(--text-muted); font-size:13px;">Geen opties beschikbaar</span>';
+      return;
+    }
+
     items.forEach(item => {
       const chip = document.createElement('div');
       chip.className = 'chip';
@@ -436,25 +462,28 @@
   }
 
   function voegConfigToe(type) {
-    if (type === 'eten') {
-      const val = document.getElementById('nieuwEtenInput').value.trim();
-      if (val && !appConfig.eten.includes(val)) {
-        appConfig.eten.push(val);
-        document.getElementById('nieuwEtenInput').value = '';
+    let inputId = '';
+    if (type === 'eten') inputId = 'nieuwEtenInput';
+    else if (type === 'eenheden') inputId = 'nieuweEenheidInput';
+    else if (type === 'dranken') inputId = 'nieuweDrankInput';
+    else if (type === 'hoeveelheden') inputId = 'customMlInput';
+
+    const val = document.getElementById(inputId).value.trim();
+    if (!val) return;
+
+    if (type === 'hoeveelheden') {
+      const numVal = Number(val);
+      if (!isNaN(numVal) && !appConfig.hoeveelheden.includes(numVal)) {
+        appConfig.hoeveelheden.push(numVal);
+        document.getElementById(inputId).value = '';
       }
-    } else if (type === 'eenheden') {
-      const val = document.getElementById('nieuweEenheidInput').value.trim();
-      if (val && !appConfig.eenheden.includes(val)) {
-        appConfig.eenheden.push(val);
-        document.getElementById('nieuweEenheidInput').value = '';
-      }
-    } else if (type === 'dranken') {
-      const val = document.getElementById('nieuweDrankInput').value.trim();
-      if (val && !appConfig.dranken.includes(val)) {
-        appConfig.dranken.push(val);
-        document.getElementById('nieuweDrankInput').value = '';
+    } else {
+      if (!appConfig[type].includes(val)) {
+        appConfig[type].push(val);
+        document.getElementById(inputId).value = '';
       }
     }
+
     slaConfigOp(true);
   }
 
@@ -501,7 +530,7 @@
 
   function slaDrinkenOp() {
     const datum = document.getElementById('drinkenDatum').value;
-    const dranken = getGeselecteerdeChips('drankChips');
+    const dranken = getGeselecteerdeChips('drinken' === 'eten' ? '' : 'drankChips');
     const geselecteerdeMl = getGeselecteerdeChips('hoeveelheidChips');
     const customMl = document.getElementById('customMlInput').value;
     const notitie = document.getElementById('drinkenNotitie').value;
@@ -538,7 +567,6 @@
         const tbody = document.getElementById('dagboekBody');
         tbody.innerHTML = '';
         
-        // Update progressbalk
         const limiet = appConfig.limiet || 1000;
         const totaal = data.totaalMl || 0;
         const pct = Math.min(Math.round((totaal / limiet) * 100), 100);
@@ -610,7 +638,7 @@
     const eind = document.getElementById('exportEind').value;
     fetch(WEB_APP_URL, {
       method: 'POST',
-      body: JSON.stringify({ actie: 'exporteer', start, eind, formaat })
+      body: JSON.stringify({ actie: 'exporteerEtenDrinken', start, eind, formaat })
     })
     .then(res => res.json())
     .then(res => alert(res.message))
