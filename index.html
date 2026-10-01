@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasker - Eten & Drinken</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 12px;
+      background: var(--bg-color);
+      color: var(--text-main);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto 16px auto;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Progressbar */
+    .progress-box {
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--success);
+      width: 0%;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    h2 {
+      color: var(--text-main);
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      box-sizing: border-box;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      color: var(--text-main);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .chip {
+      background: #f1f5f9;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .chip.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .primary-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .secondary-button {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .danger-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      min-width: 400px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Progressbalk voor Limiet -->
+  <div class="progress-box">
+    <div class="progress-label">
+      <span>Drinken Totaal Vandaag</span>
+      <span id="progressText">0 / 1000 ml</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div id="progressBarFill" class="progress-bar-fill"></div>
+    </div>
+  </div>
+
+  <!-- Hoofd Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="openTab(event, 'tabEten')">🍎 Eten</button>
+    <button class="tab-btn" onclick="openTab(event, 'tabDrinken')">💧 Drinken</button>
+    <button class="tab-btn" onclick="openTab(event, 'tabDagboek')">📅 Vandaag</button>
+    <button class="tab-btn" onclick="openTab(event, 'tabOverzicht')">📊 Overzicht</button>
+    <button class="tab-btn" onclick="openTab(event, 'tabConfig')">⚙️ Config</button>
+  </div>
+
+  <!-- TAB 1: ETEN -->
+  <div id="tabEten" class="tab-content active">
+    <h2>🍎 Eten Registreren</h2>
+    
+    <div class="form-group">
+      <label>Datum</label>
+      <input type="date" id="etenDatum">
+    </div>
+
+    <div class="form-group">
+      <label>Product (Meerdere selecties mogelijk)</label>
+      <div id="etenChips" class="chip-container"></div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input type="text" id="nieuwEtenInput" placeholder="Nieuw product toevoegen...">
+        <button class="secondary-button" onclick="voegConfigToe('eten')">+</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Hoeveelheid / Maat (Bord, Portie, etc.)</label>
+      <div id="eenheidChips" class="chip-container"></div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input type="text" id="nieuweEenheidInput" placeholder="Nieuwe eenheid toevoegen...">
+        <button class="secondary-button" onclick="voegConfigToe('eenheden')">+</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Notitie</label>
+      <input type="text" id="etenNotitie" placeholder="Bijv. Met extra boter...">
+    </div>
+
+    <button class="primary-button" onclick="slaEtenOp()">Eten Opslaan</button>
+  </div>
+
+  <!-- TAB 2: DRINKEN -->
+  <div id="tabDrinken" class="tab-content">
+    <h2>💧 Drinken Registreren</h2>
+    
+    <div class="form-group">
+      <label>Datum</label>
+      <input type="date" id="drinkenDatum">
+    </div>
+
+    <div class="form-group">
+      <label>Drankje (Meerdere selecties mogelijk)</label>
+      <div id="drankChips" class="chip-container"></div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input type="text" id="nieuweDrankInput" placeholder="Nieuw drankje toevoegen...">
+        <button class="secondary-button" onclick="voegConfigToe('dranken')">+</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Hoeveelheid in ml (Snelkeuze of eigen waarde)</label>
+      <div id="hoeveelheidChips" class="chip-container"></div>
+      <input type="number" id="customMlInput" placeholder="Of typ aantal ml..." style="margin-top:6px;">
+    </div>
+
+    <div class="form-group">
+      <label>Notitie</label>
+      <input type="text" id="drinkenNotitie" placeholder="Bijv. Met suiker...">
+    </div>
+
+    <button class="primary-button" onclick="slaDrinkenOp()">Drinken Opslaan</button>
+  </div>
+
+  <!-- TAB 3: DAGOVERZICHT -->
+  <div id="tabDagboek" class="tab-content">
+    <h2>📅 Vandaag Overzicht</h2>
+    <div class="form-group">
+      <label>Kies Datum</label>
+      <input type="date" id="overzichtDatumInput" onchange="laadDagOverzicht()">
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Tijd/Datum</th>
+            <th>Type</th>
+            <th>Item</th>
+            <th>Hoeveelheid</th>
+            <th>Actie</th>
+          </tr>
+        </thead>
+        <tbody id="dagboekBody"><tr><td colspan="5" style="text-align:center;">Laden...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 4: TOTAAL OVERZICHT & EXPORT -->
+  <div id="tabOverzicht" class="tab-content">
+    <h2>📊 Periode Overzicht & Exporteren</h2>
+    <div class="form-row" style="display:flex; gap:10px; margin-bottom:12px;">
+      <div class="form-group" style="flex:1;"><label>Startdatum</label><input type="date" id="exportStart"></div>
+      <div class="form-group" style="flex:1;"><label>Einddatum</label><input type="date" id="exportEind"></div>
+    </div>
+    <button class="secondary-button" style="width:100%; margin-bottom:12px;" onclick="laadTotaalOverzicht()">Overzicht Tonen</button>
+    
+    <div style="display:flex; gap:8px; margin-bottom:14px;">
+      <button class="primary-button" onclick="exporteerData('pdf')">Exporteer PDF</button>
+      <button class="primary-button" style="background:#16a34a;" onclick="exporteerData('excel')">Exporteer Excel</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Type</th>
+            <th>Item</th>
+            <th>Hoeveelheid</th>
+            <th>Notitie</th>
+          </tr>
+        </thead>
+        <tbody id="totaalBody"><tr><td colspan="5" style="text-align:center;">Kies periode...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 5: CONFIGURATIE -->
+  <div id="tabConfig" class="tab-content">
+    <h2>⚙️ Instellingen & Limieten</h2>
+    <div class="form-group">
+      <label>Dagelijkse Limiet Drinken (ml)</label>
+      <input type="number" id="configLimiet">
+    </div>
+    <button class="primary-button" onclick="slaConfigOp()">Instellingen Opslaan</button>
+  </div>
+</div>
+
+<script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzlyX0g7xgSS5eYF6-R0QJlLywflW4Gz9nmK7y30Ahet50tKbe-I9Ybud1TtKI7tKWw/exec";
+  let appConfig = {};
+
+  function openTab(evt, tabName) {
+    const contents = document.getElementsByClassName('tab-content');
+    for (let c of contents) c.classList.remove('active');
+    const buttons = document.getElementsByClassName('tab-btn');
+    for (let b of buttons) b.classList.remove('active');
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+  }
+
+  function setVandaagDatums() {
+    const vandaag = new Date().toISOString().split('T')[0];
+    document.getElementById('etenDatum').value = vandaag;
+    document.getElementById('drinkenDatum').value = vandaag;
+    document.getElementById('overzichtDatumInput').value = vandaag;
+    document.getElementById('exportStart').value = vandaag;
+    document.getElementById('exportEind').value = vandaag;
+  }
+
+  function laadConfig() {
+    fetch(WEB_APP_URL + "?actie=getConfig")
+      .then(res => res.json())
+      .then(data => {
+        appConfig = data;
+        document.getElementById('configLimiet').value = data.limiet;
+        bouwChips('etenChips', data.eten, true);
+        bouwChips('eenheidChips', data.eenheden, false);
+        bouwChips('drankChips', data.dranken, true);
+        bouwChips('hoeveelheidChips', data.hoeveelheden, false);
+        laadDagOverzicht();
+      })
+      .catch(err => console.warn("Fout bij laden config:", err));
+  }
+
+  function bouwChips(containerId, items, multiSelect) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    items.forEach(item => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = item;
+      chip.onclick = function() {
+        if (!multiSelect) {
+          container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        }
+        chip.classList.toggle('selected');
+      };
+      container.appendChild(chip);
+    });
+  }
+
+  function getGeselecteerdeChips(containerId) {
+    const container = document.getElementById(containerId);
+    const selected = container.querySelectorAll('.chip.selected');
+    return Array.from(selected).map(c => c.textContent);
+  }
+
+  function voegConfigToe(type) {
+    if (type === 'eten') {
+      const val = document.getElementById('nieuwEtenInput').value.trim();
+      if (val && !appConfig.eten.includes(val)) {
+        appConfig.eten.push(val);
+        document.getElementById('nieuwEtenInput').value = '';
+      }
+    } else if (type === 'eenheden') {
+      const val = document.getElementById('nieuweEenheidInput').value.trim();
+      if (val && !appConfig.eenheden.includes(val)) {
+        appConfig.eenheden.push(val);
+        document.getElementById('nieuweEenheidInput').value = '';
+      }
+    } else if (type === 'dranken') {
+      const val = document.getElementById('nieuweDrankInput').value.trim();
+      if (val && !appConfig.dranken.includes(val)) {
+        appConfig.dranken.push(val);
+        document.getElementById('nieuweDrankInput').value = '';
+      }
+    }
+    slaConfigOp(true);
+  }
+
+  function slaConfigOp(stil) {
+    appConfig.limiet = Number(document.getElementById('configLimiet').value) || 1000;
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify({ actie: 'updateConfig', ...appConfig })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (!stil) alert(res.message);
+      laadConfig();
+    })
+    .catch(err => alert('Fout: ' + err));
+  }
+
+  function slaEtenOp() {
+    const datum = document.getElementById('etenDatum').value;
+    const producten = getGeselecteerdeChips('etenChips');
+    const eenheden = getGeselecteerdeChips('eenheidChips');
+    const notitie = document.getElementById('etenNotitie').value;
+
+    if (producten.length === 0) {
+      alert('Selecteer ten minste één product.');
+      return;
+    }
+
+    const items = producten.map((prod, idx) => ({
+      produkt: prod,
+      hoeveelheid: eenheden[idx] || eenheden[0] || '1 Portie'
+    }));
+
+    const payload = { actie: 'slaInnameOp', type: 'eten', datum, items, notitie };
+
+    fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(res => res.json())
+      .then(res => {
+        alert(res.message);
+        document.getElementById('etenNotitie').value = '';
+        laadDagOverzicht();
+      });
+  }
+
+  function slaDrinkenOp() {
+    const datum = document.getElementById('drinkenDatum').value;
+    const dranken = getGeselecteerdeChips('drankChips');
+    const geselecteerdeMl = getGeselecteerdeChips('hoeveelheidChips');
+    const customMl = document.getElementById('customMlInput').value;
+    const notitie = document.getElementById('drinkenNotitie').value;
+
+    if (dranken.length === 0) {
+      alert('Selecteer ten minste één drankje.');
+      return;
+    }
+
+    let mlWaarde = customMl ? Number(customMl) : (Number(geselecteerdeMl[0]) || 150);
+
+    const items = dranken.map(drank => ({
+      drank: drank,
+      hoeveelheid: mlWaarde
+    }));
+
+    const payload = { actie: 'slaInnameOp', type: 'dranken', datum, items, notitie };
+
+    fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(res => res.json())
+      .then(res => {
+        alert(res.message);
+        document.getElementById('drinkenNotitie').value = '';
+        document.getElementById('customMlInput').value = '';
+        laadDagOverzicht();
+      });
+  }
+
+  function laadDagOverzicht() {
+    const datum = document.getElementById('overzichtDatumInput').value;
+    fetch(WEB_APP_URL + `?actie=getDagOverzicht&datum=${datum}`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('dagboekBody');
+        tbody.innerHTML = '';
+        
+        // Update progressbalk
+        const limiet = appConfig.limiet || 1000;
+        const totaal = data.totaalMl || 0;
+        const pct = Math.min(Math.round((totaal / limiet) * 100), 100);
+        document.getElementById('progressText').textContent = `${totaal} / ${limiet} ml`;
+        const fill = document.getElementById('progressBarFill');
+        fill.style.width = pct + '%';
+        fill.style.background = totaal > limiet ? 'var(--danger)' : 'var(--success)';
+
+        if (!data.items || data.items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Geen invoer voor deze dag</td></tr>';
+          return;
+        }
+
+        data.items.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.datum.substring(11, 16) || item.datum}</td>
+            <td><strong>${item.type}</strong></td>
+            <td>${item.item}</td>
+            <td>${item.hoeveelheid} ${item.notitie ? '• ' + item.notitie : ''}</td>
+            <td><button class="danger-btn" onclick="verwijderItem('${item.id}')">Verwijder</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+  }
+
+  function verwijderItem(id) {
+    if (!confirm('Weet je zeker dat je dit item wilt verwijderen?')) return;
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify({ actie: 'verwijderItem', id })
+    })
+    .then(res => res.json())
+    .then(res => {
+      alert(res.message);
+      laadDagOverzicht();
+    });
+  }
+
+  function laadTotaalOverzicht() {
+    const start = document.getElementById('exportStart').value;
+    const eind = document.getElementById('exportEind').value;
+    fetch(WEB_APP_URL + `?actie=getTotaalOverzicht&start=${start}&eind=${eind}`)
+      .then(res => res.json())
+      .then(items => {
+        const tbody = document.getElementById('totaalBody');
+        tbody.innerHTML = '';
+        if (!items || items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Geen gegevens in deze periode</td></tr>';
+          return;
+        }
+        items.forEach(i => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i.datum.substring(0, 10)}</td>
+            <td>${i.type}</td>
+            <td>${i.item}</td>
+            <td>${i.hoeveelheid}</td>
+            <td>${i.notitie || ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+  }
+
+  function exporteerData(formaat) {
+    const start = document.getElementById('exportStart').value;
+    const eind = document.getElementById('exportEind').value;
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify({ actie: 'exporteer', start, eind, formaat })
+    })
+    .then(res => res.json())
+    .then(res => alert(res.message))
+    .catch(err => alert('Export fout: ' + err));
+  }
+
+  window.onload = function() {
+    setVandaagDatums();
+    laadConfig();
+  };
+</script>
+
+</body>
+</html>
