@@ -83,7 +83,7 @@
                 <input type="text" id="etenNotitie" placeholder="Eventuele opmerkingen..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
             </div>
 
-            <button onclick="slaEtenOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition">Alles Opslaan naar Google Sheet</button>
+            <button id="btnSlaEten" onclick="slaEtenOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition">Alles Opslaan naar Google Sheet</button>
         </div>
 
         <!-- TAB 2: Drinken Invoeren -->
@@ -123,7 +123,7 @@
                 <input type="text" id="drankNotitie" placeholder="Eventuele opmerkingen..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-sky-500">
             </div>
 
-            <button onclick="slaDrankenOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition">Alles Opslaan naar Google Sheet</button>
+            <button id="btnSlaDranken" onclick="slaDrankenOp()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition">Alles Opslaan naar Google Sheet</button>
         </div>
 
         <!-- TAB 3: Vandaag Overzicht -->
@@ -287,7 +287,6 @@
             });
         }
 
-        // Nieuwe snelkeuze toevoegen via pop-up prompt
         function vraagNieuweSnelkeuze(categorie, vraagTekst) {
             const waarde = prompt(vraagTekst);
             if (!waarde || !waarde.trim()) return;
@@ -299,7 +298,7 @@
             .then(res => res.json())
             .then(res => {
                 toonStatus(res.message);
-                laadConfig(); // Herlaad instellingen zodat de nieuwe knop direct verschijnt
+                laadConfig();
             })
             .catch(err => toonStatus("Fout bij toevoegen: " + err, true));
         }
@@ -376,8 +375,15 @@
             });
         }
 
+        // Eten opslaan met actieve visuele feedback (kleurwissel & blokkade tegen dubbelklik)
         function slaEtenOp() {
             if (teVerzendenEten.length === 0) return toonStatus("Voeg minimaal één item toe aan de lijst.", true);
+
+            const btn = document.getElementById('btnSlaEten');
+            btn.disabled = true;
+            btn.className = "w-full bg-slate-400 text-white font-bold py-3.5 px-6 rounded-xl shadow-md cursor-not-allowed transition";
+            btn.innerText = "Bezig met opslaan...";
+
             fetch(WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ actie: 'slaInnameOp', type: 'eten', items: teVerzendenEten, notitie: document.getElementById('etenNotitie').value })
@@ -389,12 +395,29 @@
                 teVerzendenEten = [];
                 renderEtenLijst();
                 laadDagOverzicht();
+                
+                // Knop weer herstellen naar normaal
+                btn.disabled = false;
+                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
+                btn.innerText = "Alles Opslaan naar Google Sheet";
             })
-            .catch(err => toonStatus("Fout bij opslaan: " + err, true));
+            .catch(err => {
+                toonStatus("Fout bij opslaan: " + err, true);
+                btn.disabled = false;
+                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
+                btn.innerText = "Alles Opslaan naar Google Sheet";
+            });
         }
 
+        // Drinken opslaan met actieve visuele feedback (kleurwissel & blokkade tegen dubbelklik)
         function slaDrankenOp() {
             if (teVerzendenDranken.length === 0) return toonStatus("Voeg minimaal één drankje toe aan de lijst.", true);
+
+            const btn = document.getElementById('btnSlaDranken');
+            btn.disabled = true;
+            btn.className = "w-full bg-slate-400 text-white font-bold py-3.5 px-6 rounded-xl shadow-md cursor-not-allowed transition";
+            btn.innerText = "Bezig met opslaan...";
+
             fetch(WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ actie: 'slaInnameOp', type: 'dranken', items: teVerzendenDranken, notitie: document.getElementById('drankNotitie').value })
@@ -406,8 +429,18 @@
                 teVerzendenDranken = [];
                 renderDrankLijst();
                 laadDagOverzicht();
+
+                // Knop weer herstellen naar normaal
+                btn.disabled = false;
+                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
+                btn.innerText = "Alles Opslaan naar Google Sheet";
             })
-            .catch(err => toonStatus("Fout bij opslaan: " + err, true));
+            .catch(err => {
+                toonStatus("Fout bij opslaan: " + err, true);
+                btn.disabled = false;
+                btn.className = "w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition";
+                btn.innerText = "Alles Opslaan naar Google Sheet";
+            });
         }
 
         function laadDagOverzicht() {
